@@ -2,20 +2,32 @@ package config
 
 import (
 	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"time"
 )
 
 type Config struct {
-	Env        string `yaml:"local" env-default:"local"`
-	HTTPServer HTTPServer
+	Env        string     `yaml:"local" env-default:"local"`
+	HTTPServer HTTPServer `yaml:"http_server"`
+	DB         DataBase   `yaml:"db"`
 }
 
 type HTTPServer struct {
-	Address     string        `yaml:"address" env-default:"localhost:8082"`
+	Host        string        `yaml:"host" env-default:"jwt-auth-service"`
+	Port        string        `yaml:"port" env-default:"8080"`
 	Timeout     time.Duration `yaml:"timeout" env-default:"4s"`
 	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
+}
+
+type DataBase struct {
+	Username   string `yaml:"username" env-default:"postgres"`
+	Host       string `yaml:"host" env-default:"db"`
+	Port       string `yaml:"port" env-default:"5432"`
+	DBName     string `yaml:"dbname" env-default:"my-db"`
+	DBPassword string
+	SSLMode    string `yaml:"sslmode" env-default:"disable"`
 }
 
 func MustLoad() *Config {
@@ -30,5 +42,10 @@ func MustLoad() *Config {
 	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
 		log.Fatalf("cannot read config: %s", err)
 	}
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("error loading .env file: %v", err)
+	}
+	cfg.DB.DBPassword = os.Getenv("DB_PASSWORD")
 	return &cfg
 }
