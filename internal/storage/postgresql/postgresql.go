@@ -14,7 +14,7 @@ type Storage struct {
 }
 
 func New(dsn string) (*Storage, error) {
-	const op = "strg.postgresql.New"
+	const op = "storage.postgresql.New"
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
@@ -64,9 +64,9 @@ func (s *Storage) UserExists(login, password string) (bool, error) {
 	err := s.DB.QueryRow(query, login, password).Scan()
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return false, storage.ErrUserNotFound
+			return false, fmt.Errorf("%s: %w", op, storage.ErrUserNotFound)
 		}
-		return false, fmt.Errorf("error querying user: %w", err)
+		return false, fmt.Errorf("%s: %w", op, err)
 	}
 	return true, nil
 }

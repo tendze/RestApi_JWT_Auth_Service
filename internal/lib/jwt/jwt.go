@@ -34,9 +34,6 @@ func GenerateToken(login, password string, getter USERGetter) (string, error) {
 		}
 		return "", err
 	}
-	if err != nil {
-		return "", fmt.Errorf("invalid expiration duration: %w", err)
-	}
 	claims := &jwt.StandardClaims{
 		Subject:   login,
 		ExpiresAt: time.Now().Add(jwtExpirationTime).Unix(),

@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"jwt-auth-service/internal/config"
+	"jwt-auth-service/internal/http_server/handlers/url/auth"
 	"jwt-auth-service/internal/http_server/handlers/url/registration"
 	"jwt-auth-service/internal/http_server/middleware/logger"
 	"jwt-auth-service/internal/storage/postgresql"
@@ -52,6 +53,7 @@ func main() {
 	)
 
 	router.Post("/register", registration.New(log, storage))
+	router.Get("/auth", auth.New(log, storage))
 
 	// TODO: RUN SERVER
 	log.Info("starting server...", slog.String("address", cfg.HTTPServer.Host+":"+cfg.HTTPServer.Port))

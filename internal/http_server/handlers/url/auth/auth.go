@@ -1,8 +1,7 @@
-package registration
+package auth
 
 import (
 	"errors"
-	"fmt"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
@@ -23,14 +22,13 @@ type Response struct {
 	JWTToken string `json:"token,omitempty"`
 }
 
-type UserRegister interface {
-	SaveUser(login, password string) (int64, error)
+type UserAuth interface {
 	UserExists(login, password string) (bool, error)
 }
 
-func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
+func New(log *slog.Logger, auth UserAuth) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const op = "handlers.url.registration.New"
+		const op = "handlers.url.auth.New"
 		log = log.With(
 			slog.String("op", op),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
@@ -39,6 +37,7 @@ func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, response.Error("empty body"))
 		}
+
 		var req Request
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
@@ -60,25 +59,12 @@ func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
 			render.JSON(w, r, response.Error("empty login or password"))
 			return
 		}
-		lastId, err := register.SaveUser(login, password)
-		if errors.Is(err, storage.ErrUserExists) {
-			log.Error("user %v already exists", err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, response.Error("user already exists"))
-			return
-		}
-		if err != nil {
-			log.Error("failed to save user", err.Error())
+		token, err := jwt.GenerateToken(login, password, auth)
+		if errors.Is(err, storage.ErrUserNotFound) {
+			log.Info("failed to generate jwt token", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
-			render.JSON(w, r, response.Error("failed to save user"))
+			render.JSON(w, r, response.Error("an error occurred during token generating"))
 			return
-		}
-		log.Info(fmt.Sprintf("user: <%v> successfully saved with id %v", login, lastId))
-		token, err := jwt.GenerateToken(login, password, register)
-		if err != nil {
-			log.Error("failed to generate jwt token", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			render.JSON(w, r, response.Error("failed to generate jwt token"))
 		}
 		render.JSON(w, r, responseOk(token))
 	}
