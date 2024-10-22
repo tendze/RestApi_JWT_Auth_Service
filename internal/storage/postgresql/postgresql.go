@@ -37,7 +37,6 @@ func New(dsn string) (*Storage, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	strg := &Storage{DB: db}
-	fmt.Println(strg.SaveUser("nnnn", "123123"))
 	return strg, nil
 }
 
@@ -57,4 +56,17 @@ func (s *Storage) SaveUser(login, password string) (int64, error) {
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 	return lastId, nil
+}
+
+func (s *Storage) UserExists(login, password string) (bool, error) {
+	const op = "storage.postgresql.UserExists"
+	query := `SELECT  FROM users WHERE login = $1 AND password = $2`
+	err := s.DB.QueryRow(query, login, password).Scan()
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, storage.ErrUserNotFound
+		}
+		return false, fmt.Errorf("error querying user: %w", err)
+	}
+	return true, nil
 }

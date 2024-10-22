@@ -9,6 +9,7 @@ import (
 	"jwt-auth-service/internal/http_server/middleware/logger"
 	"jwt-auth-service/internal/storage/postgresql"
 	"log/slog"
+	"net/http"
 	"os"
 )
 
@@ -50,9 +51,22 @@ func main() {
 		middleware.URLFormat,
 	)
 
-	router.Get("/register", registration.New(log, storage))
+	router.Post("/register", registration.New(log, storage))
 
 	// TODO: RUN SERVER
+	log.Info("starting server...", slog.String("address", cfg.HTTPServer.Host+":"+cfg.HTTPServer.Port))
+	serverAddr := cfg.HTTPServer.Host + ":" + cfg.HTTPServer.Port
+	server := &http.Server{
+		Addr:         serverAddr,
+		Handler:      router,
+		ReadTimeout:  cfg.HTTPServer.Timeout,
+		WriteTimeout: cfg.HTTPServer.Timeout,
+		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
+	}
+	if err = server.ListenAndServe(); err != nil {
+		log.Error("failed to start server")
+	}
+	log.Error("server stopped")
 }
 
 func setupLogger(env string) *slog.Logger {
