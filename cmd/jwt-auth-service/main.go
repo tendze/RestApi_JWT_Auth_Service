@@ -2,7 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"jwt-auth-service/internal/config"
+	"jwt-auth-service/internal/http_server/handlers/url/registration"
+	"jwt-auth-service/internal/http_server/middleware/logger"
 	"jwt-auth-service/internal/storage/postgresql"
 	"log/slog"
 	"os"
@@ -37,6 +41,16 @@ func main() {
 	defer storage.DB.Close()
 
 	// TODO: INIT ROUTER CHI:"chi render"
+	router := chi.NewRouter()
+	router.Use(
+		middleware.RequestID,
+		middleware.Logger,
+		logger.New(log),
+		middleware.Recoverer,
+		middleware.URLFormat,
+	)
+
+	router.Get("/register", registration.New(log, storage))
 
 	// TODO: RUN SERVER
 }

@@ -3,7 +3,7 @@ version: '3.8'
 services:
   jwt-auth-service:
     build: ./
-    command: sh -c "sleep 10 && ./jwt-auth-service"
+    command: sh -c "sleep 2 && ./jwt-auth-service"
     ports:
       - "8000:8000"
     depends_on:
