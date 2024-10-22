@@ -12,6 +12,7 @@ import (
 
 type Response struct {
 	response.Response
+	UserLogin string `json:"user-login"`
 }
 
 func New(log *slog.Logger) http.HandlerFunc {
@@ -38,13 +39,20 @@ func New(log *slog.Logger) http.HandlerFunc {
 			render.JSON(w, r, response.Error("Invalid authorization header format"))
 			return
 		}
-		err = jwt.ValidateToken(tokenString)
+		userLogin, err := jwt.ValidateToken(tokenString)
 		if err != nil {
 			log.Info("Invalid token")
 			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, response.Error("Invalid token"))
 			return
 		}
-		render.JSON(w, r, response.OK())
+		render.JSON(w, r, responseOK(userLogin))
+	}
+}
+
+func responseOK(userLogin string) Response {
+	return Response{
+		response.OK(),
+		userLogin,
 	}
 }

@@ -51,7 +51,8 @@ func GenerateToken(login, password string, getter USERGetter) (string, error) {
 	return signedToken, nil
 }
 
-func ValidateToken(jwtToken string) error {
+// ValidateToken returns user login and error
+func ValidateToken(jwtToken string) (string, error) {
 	token, err := jwt.ParseWithClaims(jwtToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -59,10 +60,10 @@ func ValidateToken(jwtToken string) error {
 		return secretKey, nil
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
-	if _, ok := token.Claims.(*tokenClaims); ok && token.Valid {
-		return nil
+	if tok, ok := token.Claims.(*tokenClaims); ok && token.Valid {
+		return tok.UserLogin, nil
 	}
-	return fmt.Errorf("invalid token")
+	return "", fmt.Errorf("invalid token")
 }
