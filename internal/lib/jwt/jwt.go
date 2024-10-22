@@ -26,6 +26,11 @@ type USERGetter interface {
 	UserExists(login, password string) (bool, error)
 }
 
+type tokenClaims struct {
+	jwt.StandardClaims
+	UserLogin string `json:"login"`
+}
+
 func GenerateToken(login, password string, getter USERGetter) (string, error) {
 	_, err := getter.UserExists(login, password)
 	if err != nil {
@@ -34,15 +39,30 @@ func GenerateToken(login, password string, getter USERGetter) (string, error) {
 		}
 		return "", err
 	}
-	claims := &jwt.StandardClaims{
-		Subject:   login,
+	claims := &tokenClaims{jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(jwtExpirationTime).Unix(),
 		IssuedAt:  time.Now().Unix(),
-	}
+	}, login}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedToken, err := token.SignedString(secretKey)
 	if err != nil {
 		return "", fmt.Errorf("error signing key: %w", err)
 	}
 	return signedToken, nil
+}
+
+func ValidateToken(jwtToken string) error {
+	token, err := jwt.ParseWithClaims(jwtToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return secretKey, nil
+	})
+	if err != nil {
+		return err
+	}
+	if _, ok := token.Claims.(*tokenClaims); ok && token.Valid {
+		return nil
+	}
+	return fmt.Errorf("invalid token")
 }

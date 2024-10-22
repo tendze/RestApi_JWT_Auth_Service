@@ -7,6 +7,7 @@ import (
 	"jwt-auth-service/internal/config"
 	"jwt-auth-service/internal/http_server/handlers/url/auth"
 	"jwt-auth-service/internal/http_server/handlers/url/registration"
+	"jwt-auth-service/internal/http_server/handlers/url/validate"
 	"jwt-auth-service/internal/http_server/middleware/logger"
 	"jwt-auth-service/internal/storage/postgresql"
 	"log/slog"
@@ -54,6 +55,7 @@ func main() {
 
 	router.Post("/register", registration.New(log, storage))
 	router.Get("/auth", auth.New(log, storage))
+	router.Get("/validate", validate.New(log))
 
 	// TODO: RUN SERVER
 	log.Info("starting server...", slog.String("address", cfg.HTTPServer.Host+":"+cfg.HTTPServer.Port))

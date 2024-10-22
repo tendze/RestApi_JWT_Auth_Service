@@ -60,12 +60,17 @@ func New(log *slog.Logger, auth UserAuth) http.HandlerFunc {
 			return
 		}
 		token, err := jwt.GenerateToken(login, password, auth)
-		if errors.Is(err, storage.ErrUserNotFound) {
-			log.Info("failed to generate jwt token", err.Error())
+		if err != nil {
+			text := "an unexpected error occurred during token generating"
+			if errors.Is(err, storage.ErrUserNotFound) {
+				text = "user not found"
+			}
+			log.Info(text, err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
-			render.JSON(w, r, response.Error("an error occurred during token generating"))
+			render.JSON(w, r, response.Error(text))
 			return
 		}
+
 		render.JSON(w, r, responseOk(token))
 	}
 }
