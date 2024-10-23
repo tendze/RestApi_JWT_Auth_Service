@@ -22,6 +22,7 @@ type Response struct {
 	JWTToken string `json:"token,omitempty"`
 }
 
+//go:generate go run github.com/vektra/mockery/v2@latest --name=UserAuth
 type UserAuth interface {
 	UserExists(login, password string) (bool, error)
 }
@@ -41,12 +42,12 @@ func New(log *slog.Logger, auth UserAuth) http.HandlerFunc {
 		var req Request
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
-			log.Error("failed to decode request body", err.Error())
+			log.Error("failed to decode request body")
 			return
 		}
 		log.Info("request body decoded", slog.Any("request", req))
 		if err = validator.New().Struct(req); err != nil {
-			log.Error("invalid request", err.Error())
+			log.Error("invalid request")
 			validateError := err.(validator.ValidationErrors)
 			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, response.ValidationError(validateError))
@@ -65,7 +66,7 @@ func New(log *slog.Logger, auth UserAuth) http.HandlerFunc {
 			if errors.Is(err, storage.ErrUserNotFound) {
 				text = "user not found"
 			}
-			log.Info(text, err.Error())
+			log.Info(text)
 			w.WriteHeader(http.StatusInternalServerError)
 			render.JSON(w, r, response.Error(text))
 			return
