@@ -37,6 +37,7 @@ func New(log *slog.Logger, auth UserAuth) http.HandlerFunc {
 		if r.Body == nil || r.ContentLength == 0 {
 			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, response.Error("empty body"))
+			return
 		}
 
 		var req Request

@@ -20,4 +20,4 @@ services:
       - POSTGRES_PASSWORD=qwerty
       - POSTGRES_DB=jwt-auth-db
     ports:
-      - "5436:5432"
+      - "5435:5432"
