@@ -43,6 +43,8 @@ func New(log *slog.Logger, auth UserAuth) http.HandlerFunc {
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("failed to decode request body")
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, response.Error("invalid request body"))
 			return
 		}
 		log.Info("request body decoded", slog.Any("request", req))
@@ -67,7 +69,7 @@ func New(log *slog.Logger, auth UserAuth) http.HandlerFunc {
 				text = "user not found"
 			}
 			log.Info(text)
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, response.Error(text))
 			return
 		}
