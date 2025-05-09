@@ -1,4 +1,4 @@
-env: "local"
+env: "dev"
 http_server:
   host: "jwt-auth-service"
   port: "8000"

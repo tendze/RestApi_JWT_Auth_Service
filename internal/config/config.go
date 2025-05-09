@@ -1,11 +1,14 @@
 package config
 
 import (
-	"github.com/ilyakaznacheev/cleanenv"
-	"github.com/joho/godotenv"
+	"flag"
+	"fmt"
 	"log"
 	"os"
 	"time"
+
+	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -31,21 +34,40 @@ type DataBase struct {
 }
 
 func MustLoad() *Config {
-	configPath := os.Getenv("CONFIG_PATH")
-	if configPath == "" {
+	configPath, err := fetchConfigPath()
+	if err != nil {
+		panic(err)
+	} else if configPath == "" {
 		log.Fatal("CONFIG_PATH is empty")
+	} else if _, err = os.Stat(configPath); os.IsNotExist(err) {
+		panic("config file does not exists")
 	}
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		log.Fatalf("config file does not exits: %s", configPath)
-	}
+
 	var cfg Config
-	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+	if err = cleanenv.ReadConfig(configPath, &cfg); err != nil {
 		log.Fatalf("cannot read config: %s", err)
 	}
-	err := godotenv.Load()
+
+	err = godotenv.Load()
 	if err != nil {
-		log.Fatalf("error loading .env file: %v", err)
+		panic("could not load .env")
 	}
 	cfg.DB.DBPassword = os.Getenv("DB_PASSWORD")
+
 	return &cfg
+}
+
+func fetchConfigPath() (string, error) {
+	var configPath string
+	flag.StringVar(&configPath, "config_path", "", "path to config file")
+	flag.Parse()
+	if configPath == "" {
+		configPath = os.Getenv("CONFIG_PATH")
+	}
+
+	if configPath == "" {
+		return "", fmt.Errorf("config path is empty")
+	}
+
+	return configPath, nil
 }

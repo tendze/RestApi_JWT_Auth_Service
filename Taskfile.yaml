@@ -1,0 +1,20 @@
+version: "3"
+
+tasks:
+  AuthService:
+    desc: "start AuthService locally"
+    aliases:
+      - auth
+    cmd: go run ./cmd/jwt-auth-service/main.go --config_path=./config/local.yaml
+  AuthServiceDev:
+    desc: "start AuthService in dev environment"
+    aliases:
+      - authdev
+    cmds: 
+      - "docker-compose up --build -d db"
+      - "docker-compose up --build -d jwt-auth-service"
+  AuthServiceDB:
+    desc: "start AuthService database"
+    alliases:
+      - db
+    cmd: "docker-compose up --build -d db"
