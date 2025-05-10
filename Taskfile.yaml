@@ -1,20 +1,29 @@
 version: "3"
 
 tasks:
-  AuthService:
-    desc: "start AuthService locally"
+  AuthServiceLocal:
+    desc: "start AuthService in docker in local environment"
     aliases:
-      - auth
-    cmd: go run ./cmd/jwt-auth-service/main.go --config_path=./config/local.yaml
-  AuthServiceDev:
-    desc: "start AuthService in dev environment"
+      - authlocal
+    cmds: 
+      - "docker-compose up --build -d postgres"
+      - "docker-compose up --build -d jwt-auth-service-local"
+  AuthServiceDevl:
+    desc: "start AuthService in docker in dev environment"
     aliases:
       - authdev
     cmds: 
-      - "docker-compose up --build -d db"
-      - "docker-compose up --build -d jwt-auth-service"
+      - "docker-compose up --build -d postgres"
+      - "docker-compose up --build -d jwt-auth-service-dev"
+  AuthServiceProd:
+    desc: "start AuthService in docker in prod environment"
+    aliases:
+      - authprod
+    cmds: 
+      - "docker-compose up --build -d postgres"
+      - "docker-compose up --build -d jwt-auth-service-prod"
   AuthServiceDB:
     desc: "start AuthService database"
     alliases:
       - db
-    cmd: "docker-compose up --build -d db"
+    cmd: "docker-compose up --build -d postgres"

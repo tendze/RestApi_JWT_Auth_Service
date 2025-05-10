@@ -1,26 +1,60 @@
 version: '3.8'
 
 services:
-  jwt-auth-service:
-    build: ./
-    command: sh -c "sleep 2 && ./jwt-auth-service"
+  jwt-auth-service-local:
+    build: .
     ports:
       - "8001:8000"
     depends_on:
-      - db
+      - postgres
     environment:
-      - DB_PASSWORD=qwerty
+      - DB_PASSWORD=${DB_PASSWORD}
+      - CONFIG_PATH=./config/local.yaml
+    command: ["--config_path=${CONFIG_PATH}"]
+    networks:
+      - auth-network
+  jwt-auth-service-dev:
+    build: .
+    ports:
+      - "8002:8000"
+    depends_on:
+      - postgres
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
       - CONFIG_PATH=./config/dev.yaml
-  db:
+    command: ["--config_path=${CONFIG_PATH}"]
+    networks:
+      - auth-network
+  jwt-auth-service-prod:
+    build: .
+    ports:
+      - "8003:8000"
+    depends_on:
+      - postgres
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
+      - CONFIG_PATH=./config/prod.yaml
+    command: ["--config_path=${CONFIG_PATH}"]
+    networks:
+      - auth-network
+  postgres:
     restart: always
     image: postgres:latest
     volumes:
       - postgres-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=qwerty
       - POSTGRES_DB=jwt-auth-db
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=postgres
     ports:
       - "5436:5432"
+    networks:
+      - auth-network
+
+networks:
+  auth-network:
+    driver: bridge
+
 
 volumes:
   postgres-data:

@@ -40,6 +40,7 @@ func main() {
 	storage, err := postgresql.New(dsn)
 	if err != nil {
 		log.Error("failed to init storage:", err)
+		return
 	}
 	defer storage.DB.Close()
 
