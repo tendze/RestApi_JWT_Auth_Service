@@ -2,12 +2,14 @@ package validate
 
 import (
 	"fmt"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/render"
-	"jwt-auth-service/internal/lib/api/response"
-	"jwt-auth-service/internal/lib/jwt"
 	"log/slog"
 	"net/http"
+
+	"jwt-auth-service/internal/lib/api/response"
+	"jwt-auth-service/internal/lib/jwt"
+
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/render"
 )
 
 type Response struct {

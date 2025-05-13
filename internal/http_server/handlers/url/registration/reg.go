@@ -43,6 +43,7 @@ func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("failed to decode request body", err.Error())
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		log.Info("request body decoded", slog.Any("request", req))

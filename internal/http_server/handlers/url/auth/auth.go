@@ -2,14 +2,16 @@ package auth
 
 import (
 	"errors"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/render"
-	"github.com/go-playground/validator/v10"
+	"log/slog"
+	"net/http"
+
 	"jwt-auth-service/internal/lib/api/response"
 	"jwt-auth-service/internal/lib/jwt"
 	"jwt-auth-service/internal/storage"
-	"log/slog"
-	"net/http"
+
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/render"
+	"github.com/go-playground/validator/v10"
 )
 
 type Request struct {

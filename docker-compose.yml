@@ -1,43 +1,7 @@
 version: '3.8'
 
 services:
-  jwt-auth-service-local:
-    build: .
-    ports:
-      - "8001:8000"
-    depends_on:
-      - postgres
-    environment:
-      - DB_PASSWORD=${DB_PASSWORD}
-      - CONFIG_PATH=./config/local.yaml
-    command: ["--config_path=${CONFIG_PATH}"]
-    networks:
-      - auth-network
-  jwt-auth-service-dev:
-    build: .
-    ports:
-      - "8002:8000"
-    depends_on:
-      - postgres
-    environment:
-      - DB_PASSWORD=${DB_PASSWORD}
-      - CONFIG_PATH=./config/dev.yaml
-    command: ["--config_path=${CONFIG_PATH}"]
-    networks:
-      - auth-network
-  jwt-auth-service-prod:
-    build: .
-    ports:
-      - "8003:8000"
-    depends_on:
-      - postgres
-    environment:
-      - DB_PASSWORD=${DB_PASSWORD}
-      - CONFIG_PATH=./config/prod.yaml
-    command: ["--config_path=${CONFIG_PATH}"]
-    networks:
-      - auth-network
-  postgres:
+  auth-db:
     restart: always
     image: postgres:latest
     volumes:
@@ -49,12 +13,47 @@ services:
     ports:
       - "5436:5432"
     networks:
-      - auth-network
+      - shared-network
+  jwt-auth-service-local:
+    build: .
+    ports:
+      - "8001:8000"
+    depends_on:
+      - auth-db
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
+      - CONFIG_PATH=./config/local.yaml
+    command: ["--config_path=${CONFIG_PATH}"]
+    networks:
+      - shared-network
+  jwt-auth-service-dev:
+    build: .
+    ports:
+      - "8002:8000"
+    depends_on:
+      - auth-db
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
+      - CONFIG_PATH=./config/dev.yaml
+    command: ["--config_path=${CONFIG_PATH}"]
+    networks:
+      - shared-network
+  jwt-auth-service-prod:
+    build: .
+    ports:
+      - "8003:8000"
+    depends_on:
+      - auth-db
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
+      - CONFIG_PATH=./config/prod.yaml
+    command: ["--config_path=${CONFIG_PATH}"]
+    networks:
+      - shared-network
 
 networks:
-  auth-network:
-    driver: bridge
-
+  shared-network:
+    external: true
 
 volumes:
   postgres-data:

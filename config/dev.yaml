@@ -1,12 +1,12 @@
 env: "dev"
 http_server:
   host: "jwt-auth-service-dev"
-  port: "8002"
+  port: "8000"
   timeout: 4s
   idle_timeout: 60s
 db:
   username: "postgres"
-  host: "postgres"
+  host: "auth-db"
   port: "5432"
   dbname: "jwt-auth-db"
   sslmode: "disable"

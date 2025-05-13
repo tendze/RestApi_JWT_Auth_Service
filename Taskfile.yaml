@@ -6,24 +6,27 @@ tasks:
     aliases:
       - authlocal
     cmds: 
-      - "docker-compose up --build -d postgres"
+      - "docker network inspect shared-network >/dev/null 2>&1 || docker network create shared-network"
+      - "docker-compose up --build -d auth-db"
       - "docker-compose up --build -d jwt-auth-service-local"
-  AuthServiceDevl:
+  AuthServiceDev:
     desc: "start AuthService in docker in dev environment"
     aliases:
       - authdev
     cmds: 
-      - "docker-compose up --build -d postgres"
+      - "docker network inspect shared-network >/dev/null 2>&1 || docker network create shared-network"
+      - "docker-compose up --build -d auth-db"
       - "docker-compose up --build -d jwt-auth-service-dev"
   AuthServiceProd:
     desc: "start AuthService in docker in prod environment"
     aliases:
       - authprod
     cmds: 
-      - "docker-compose up --build -d postgres"
+      - "docker network inspect shared-network >/dev/null 2>&1 || docker network create shared-network"
+      - "docker-compose up --build -d auth-db"
       - "docker-compose up --build -d jwt-auth-service-prod"
   AuthServiceDB:
     desc: "start AuthService database"
     alliases:
       - db
-    cmd: "docker-compose up --build -d postgres"
+    cmd: "docker-compose up --build -d auth-db"

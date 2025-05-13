@@ -2,17 +2,19 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"log/slog"
+	"net/http"
+	"os"
+
 	"jwt-auth-service/internal/config"
 	"jwt-auth-service/internal/http_server/handlers/url/auth"
 	"jwt-auth-service/internal/http_server/handlers/url/registration"
 	"jwt-auth-service/internal/http_server/handlers/url/validate"
 	"jwt-auth-service/internal/http_server/middleware/logger"
 	"jwt-auth-service/internal/storage/postgresql"
-	"log/slog"
-	"net/http"
-	"os"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 const (
@@ -24,6 +26,7 @@ const (
 func main() {
 	// TODO: LOAD CONFIG
 	cfg := config.MustLoad()
+	fmt.Printf("cfg: %#v\n", cfg)
 
 	// TODO: INIT LOGGER
 	log := setupLogger(cfg.Env)
